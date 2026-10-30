@@ -1,9 +1,5 @@
 import type { Metadata, Viewport } from "next";
 
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import PageTracker from "@/components/PageTracker";
-
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -24,20 +20,11 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+// Root layout only owns <html>/<body>; the public site and the admin area each add their own chrome.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="flex min-h-screen flex-col font-sans">
-        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-accent focus:px-3 focus:py-2 focus:text-accent-ink">
-          Skip to content
-        </a>
-        <Header />
-        <main id="main" className="mx-auto w-full max-w-7xl flex-1 px-4">
-          {children}
-        </main>
-        <Footer />
-        <PageTracker />
-      </body>
+      <body className="min-h-screen font-sans">{children}</body>
     </html>
   );
 }
