@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.db
+backend/storage/
+backend/tmp_uploads/
+
+# Node
+node_modules/
+.next/
+out/
+.open-next/
+.wrangler/
+frontend/test-results/
+frontend/playwright-report/
+frontend/next-env.d.ts
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Media
+*.mp4
+*.mkv
+*.mov
+video-processing/output/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

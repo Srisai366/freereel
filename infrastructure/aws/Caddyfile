@@ -1,0 +1,19 @@
+# Single entry point on the EC2 instance (port 80). CloudFront terminates HTTPS and forwards here;
+# the security group only admits CloudFront, so this is never reached directly from the internet.
+:80 {
+	encode gzip
+
+	@backend path /api/* /media/*
+	handle @backend {
+		reverse_proxy api:8000
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+
+	# Large uploads go through the admin API; cap the body slightly above MAX_VIDEO_MB.
+	request_body {
+		max_size 4200MB
+	}
+}

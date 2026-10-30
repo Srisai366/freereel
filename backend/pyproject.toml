@@ -1,0 +1,28 @@
+[project]
+name = "freereel-backend"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["alembic/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "SIM"]
+ignore = [
+    "B008",  # FastAPI Depends() in defaults is idiomatic
+    "E501",  # line length is handled by `ruff format`
+    "S603",  # subprocess calls use argument lists, never a shell
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+known-third-party = ["alembic"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "S607"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
