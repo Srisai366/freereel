@@ -7,23 +7,29 @@ import StatusBadge from "@/components/admin/StatusBadge";
 import Poster from "@/components/Poster";
 import { adminApi, formatBytes, uploadFile, type AdminMovie, type Job } from "@/services/adminApi";
 
-const POSTER_TYPES = ".jpg,.jpeg,.png,.webp";
-const VIDEO_TYPES = ".mp4,.m4v,.mov,.mkv,.webm,.avi";
-const MAX_POSTER_MB = 5;
-const MAX_VIDEO_MB = 4096;
+export const POSTER_TYPES = ".jpg,.jpeg,.png,.webp";
+export const VIDEO_TYPES = ".mp4,.m4v,.mov,.mkv,.webm,.avi";
+export const MAX_POSTER_MB = 5;
+export const MAX_VIDEO_MB = 4096;
+
+/** Returns an error message if the file is over the limit, otherwise null. */
+export function sizeError(file: File, maxMb: number): string | null {
+  if (file.size <= maxMb * 1024 * 1024) return null;
+  return `"${file.name}" is too large (max ${maxMb >= 1024 ? `${maxMb / 1024} GB` : `${maxMb} MB`}).`;
+}
 
 interface Props {
   movie: AdminMovie;
   onChange: (movie: AdminMovie) => void;
 }
 
-function ProgressBar({ percent }: { percent: number }) {
+export function ProgressBar({ percent, label = "Uploading" }: { percent: number; label?: string }) {
   return (
-    <div className="mt-3" role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
+    <div className="mt-3" role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100} aria-label={label}>
       <div className="h-2 overflow-hidden rounded-full bg-panel-2">
         <div className="h-full bg-accent transition-all" style={{ width: `${percent}%` }} />
       </div>
-      <p className="mt-1 text-xs text-muted">{percent < 100 ? `Uploading… ${percent}%` : "Upload complete, saving…"}</p>
+      <p className="mt-1 text-xs text-muted">{percent < 100 ? `${label}… ${percent}%` : `${label}: complete, saving…`}</p>
     </div>
   );
 }
@@ -56,8 +62,9 @@ export default function UploadPanel({ movie, onChange }: Props) {
   const pick = (input: HTMLInputElement | null, maxMb: number): File | null => {
     const file = input?.files?.[0] ?? null;
     if (input) input.value = "";
-    if (file && file.size > maxMb * 1024 * 1024) {
-      notify(`File is too large (max ${maxMb >= 1024 ? `${maxMb / 1024} GB` : `${maxMb} MB`}).`, "error");
+    const tooBig = file && sizeError(file, maxMb);
+    if (tooBig) {
+      notify(tooBig, "error");
       return null;
     }
     return file;
