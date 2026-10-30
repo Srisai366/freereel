@@ -11,11 +11,14 @@ import { adminApi, type AdminMoviePage } from "@/services/adminApi";
 const STATUSES = ["", "draft", "processing", "published", "failed"];
 
 export default function AdminMoviesPage() {
-  const { notify } = useAdmin();
+  const { session, notify } = useAdmin();
+  const isAdmin = session.user.role === "admin";
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const [data, setData] = useState<AdminMoviePage | null>(null);
+  const [reload, setReload] = useState(0);
+  const [deleting, setDeleting] = useState<number | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -25,7 +28,21 @@ export default function AdminMoviesPage() {
         .catch((err) => notify(err.message, "error"));
     }, 250); // debounce typing
     return () => clearTimeout(timer);
-  }, [q, status, page, notify]);
+  }, [q, status, page, reload, notify]);
+
+  const remove = async (id: number, title: string) => {
+    if (!window.confirm(`Delete "${title}" and all its files? This can't be undone.`)) return;
+    setDeleting(id);
+    try {
+      await adminApi.deleteMovie(id);
+      notify(`Deleted "${title}"`);
+      setReload((n) => n + 1);
+    } catch (err) {
+      notify(err instanceof Error ? err.message : "Delete failed", "error");
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   return (
     <div>
@@ -91,10 +108,21 @@ export default function AdminMoviesPage() {
                     {m.has_video ? (m.video_quality.join(", ") || "Ready") : m.latest_job ? <StatusBadge status={m.latest_job.status} /> : "None"}
                   </td>
                   <td className="px-3 py-2"><StatusBadge status={m.status} /></td>
-                  <td className="px-3 py-2 text-right">
+                  <td className="whitespace-nowrap px-3 py-2 text-right">
                     <Link href={`/admin/movies/${m.id}`} className="rounded-md border border-line px-3 py-1 hover:border-accent">
                       Edit
                     </Link>
+                    {isAdmin && (
+                      <button
+                        type="button"
+                        onClick={() => remove(m.id, m.title)}
+                        disabled={deleting === m.id}
+                        className="ml-2 rounded-md border border-red-900 px-3 py-1 text-red-300 hover:bg-red-950 disabled:opacity-50"
+                        data-testid="delete-movie"
+                      >
+                        {deleting === m.id ? "Deleting…" : "Delete"}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
