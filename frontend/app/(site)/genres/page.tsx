@@ -5,6 +5,9 @@ import { api, safe } from "@/services/api";
 
 export const metadata: Metadata = { title: "Genres", description: "Browse free movies by genre." };
 
+// Needs live API data, so don't pre-render at build time.
+export const dynamic = "force-dynamic";
+
 export default async function GenresPage() {
   const genres = await safe(api.genres(), []);
   return (

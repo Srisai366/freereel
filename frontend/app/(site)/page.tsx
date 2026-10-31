@@ -4,7 +4,9 @@ import MovieShelf from "@/components/MovieShelf";
 import Poster from "@/components/Poster";
 import { api, formatDuration, safe } from "@/services/api";
 
-export const revalidate = 60;
+// Rendered per request (the API's own Cache-Control keeps it cheap). Pre-rendering at build time
+// would need the API running inside the Docker build, which it isn't.
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const [featured, latest, trending, languages, genres] = await Promise.all([
