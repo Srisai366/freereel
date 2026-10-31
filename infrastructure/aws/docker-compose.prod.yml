@@ -34,6 +34,8 @@ services:
       # Relative URL: media is served from the same CloudFront domain as the site.
       MEDIA_PUBLIC_BASE_URL: /media
       MAX_VIDEO_MB: "4096"
+      # Disk is small (30 GB): drop the original upload once the HLS renditions exist.
+      KEEP_ORIGINALS: "false"
     volumes:
       - media:/app/storage
       - uploads:/app/tmp_uploads
